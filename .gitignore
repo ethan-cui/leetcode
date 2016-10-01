@@ -27,3 +27,7 @@
 *.exe
 *.out
 *.app
+
+# swp files and .d files
+*.swp
+*.d
