@@ -21,6 +21,14 @@ std::vector<int> range(int n){
 	return res;
 }
 
+std::vector<int> range(int start, int end, int step=1){
+	int n = (int) (end - start) / step;
+	std::vector<int> res(n,start);
+	for (int i=0; i<n; i++)
+		res[i]+= i*step;
+	return res;
+}
+
 
 #endif
 

@@ -62,12 +62,12 @@ public:
 	}
 
 
-int lastRemaining(int n) {
-    if (n == 1) return 1;
-    n = n % 2 ? n - 1 : n;
-    if (n == 2) return 2;
-    return n % 4 == 0 ? 4*lastRemaining(n/4) - 2:4*lastRemaining(n/4);
-}	
+	int lastRemaining(int n) {
+	    if (n == 1) return 1;
+	    n = n % 2 ? n - 1 : n;
+	    if (n == 2) return 2;
+	    return n % 4 == 0 ? 4*lastRemaining(n/4) - 2:4*lastRemaining(n/4);
+	}	
 
 	int lastRemaining2(int n){
 		if (n == 1) return 1;
