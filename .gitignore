@@ -30,4 +30,5 @@
 
 # swp files and .d files
 *.swp
+*.swo
 *.d
