@@ -344,14 +344,75 @@ public:
 			nums[i] ^= temp;
 		}
 	}
+
+	// 89 grayCode
+	vector<int> grayCode(int n){
+		vector<int> res;
+		if (n == 0) {
+			res.push_back(0);
+			return res;
+		}
+		if (n > 32) return res;
+		if (n == 1) {
+			res.push_back(0);
+			res.push_back(1);
+			return res;
+		}
+		vector<int> temp = grayCode(n-1);
+		for (unsigned i=temp.size(); i>0; i--)
+			temp.push_back(temp[i-1] | 1<<(n-1));
+
+		return temp;
+	}
+
+	// 93 restoreIpAddresses
+	vector<string> restoreIpAddresses(string s){
+		vector<string> res;
+		if (s.length() == 0 || s.length()>12) return res;
+		string value;
+		restoreIpAddressesHelper(s, 0, 1, &res, value);
+		return res;
+
+	}
+
+	void restoreIpAddressesHelper(string s, int pos, int cnt, vector<string>*res, string value){
+		if (pos >= s.length()) return;
+		if (cnt == 4){
+			if (stoi(s.substr(pos)) > 255){
+				return;
+			} else {
+				res->push_back(value  + to_string(stoi(s.substr(pos))));
+				return;
+			}
+		}
+
+		for (int i=pos; i<pos+3; i++){
+			int temp = stoi(s.substr(pos, i-pos+1));
+			if (temp > 255)
+				return;
+			string value_temp(value);
+			value_temp += (to_string(temp) + string("."));
+			restoreIpAddressesHelper(s, i+1, cnt+1, res, value_temp);
+		}
+	}
+
 };
 
 int main(){
 
 	Solution s;
-	// 47 permuteUnique
-	vector<int> a = {1,2,2,1,3,3,4};
-	vector<vector<int>> temp = s.permuteUnique(a);
+	// 93 restoreIpAddresses
+	cout << s.restoreIpAddresses(string("25525511135")) << endl;
+	cout << s.restoreIpAddresses(string("22725511135")) << endl;
+	cout << s.restoreIpAddresses(string("2511135")) << endl;
+	cout << s.restoreIpAddresses(string("0279245587303")) << endl;
+	cout << s.restoreIpAddresses(string("010010")) << endl;
+	//// 89 grayCode
+	//cout << s.grayCode(2) << endl;
+	
+	//// 47 permuteUnique
+	//vector<int> a = {1,2,2,1,3,3,4};
+	//vector<vector<int>> temp = s.permuteUnique(a);
 
 	//// 46 permute
 	//vector<int> a = {1,2,3,4};
@@ -383,8 +444,8 @@ int main(){
 	//cout << temp.size() << endl;
 	
 
-	for(auto& x:temp)
-		cout << x << endl;
+	//for(auto& x:temp)
+		//cout << x << endl;
 
 
 	return 0;
