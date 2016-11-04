@@ -1,4 +1,5 @@
 #include <vector>
+#include <iterator>
 #include <string>
 #include <algorithm>
 #include "../utils.hpp"
@@ -375,44 +376,85 @@ public:
 
 	}
 
-	void restoreIpAddressesHelper(string s, int pos, int cnt, vector<string>*res, string value){
+	void restoreIpAddressesHelper(string s, unsigned pos, int cnt, vector<string>*res, string value){
 		if (pos >= s.length()) return;
 		if (cnt == 4){
-			if (stoi(s.substr(pos)) > 255){
+			int temp = stoi(s.substr(pos));
+			if (temp > 255 || (s[pos]=='0' && (temp != 0)) || (temp == 0 && pos<s.length()-1)){
 				return;
 			} else {
-				res->push_back(value  + to_string(stoi(s.substr(pos))));
+				res->push_back(value  + s.substr(pos));
 				return;
 			}
 		}
 
 		for (int i=pos; i<pos+3; i++){
 			int temp = stoi(s.substr(pos, i-pos+1));
-			if (temp > 255)
+			if (temp > 255 || (s[pos]=='0' && (temp != 0)) || (temp == 0 && i>pos))
 				return;
 			string value_temp(value);
-			value_temp += (to_string(temp) + string("."));
+			value_temp += (s.substr(pos, i-pos+1)+ string("."));
 			restoreIpAddressesHelper(s, i+1, cnt+1, res, value_temp);
 		}
 	}
+
+	void nextPermutation(vector<int> & nums){
+		int k=-1, j=0;
+		cout << "before " << nums << endl;
+		for (unsigned i=0; i<nums.size()-1; i++){
+			if (nums[i+1] - nums[i] > 0)
+				k = i;
+		}
+
+		if (k == -1){
+			std::reverse(nums.begin(), nums.end());
+			cout << "after " << nums << endl;
+			return;
+		}
+
+		for (unsigned i=k+1; i<nums.size(); i++){
+			if (nums[i] > nums[k])
+				j = i;
+		}
+
+		int temp = nums[k] ^ nums[j];
+		nums[k] = temp^nums[k];
+		nums[j] = temp^nums[j];
+
+		vector<int>::iterator it = nums.begin();
+		std::advance(it, k+1);
+		std::reverse(it, nums.end());
+
+		cout << "after " << nums << endl;
+	}
+
+
 
 };
 
 int main(){
 
 	Solution s;
-	// 93 restoreIpAddresses
-	cout << s.restoreIpAddresses(string("25525511135")) << endl;
-	cout << s.restoreIpAddresses(string("22725511135")) << endl;
-	cout << s.restoreIpAddresses(string("2511135")) << endl;
-	cout << s.restoreIpAddresses(string("0279245587303")) << endl;
-	cout << s.restoreIpAddresses(string("010010")) << endl;
+	// 31. nextPermutation
+	vector<int> a = {3,2,1};
+	s.nextPermutation(a);
+	
+
+
+	////93 restoreIpAddresses
+	//cout << s.restoreIpAddresses(string("25525511135")) << endl;
+	//cout << s.restoreIpAddresses(string("22725511135")) << endl;
+	//cout << s.restoreIpAddresses(string("2511135")) << endl;
+	//cout << s.restoreIpAddresses(string("0279245587303")) << endl;
+	//cout << s.restoreIpAddresses(string("010010")) << endl;
+
 	//// 89 grayCode
 	//cout << s.grayCode(2) << endl;
 	
 	//// 47 permuteUnique
-	//vector<int> a = {1,2,2,1,3,3,4};
+	//vector<int> a = {1,2,2,1,3,3};
 	//vector<vector<int>> temp = s.permuteUnique(a);
+	//cout << temp.size() << endl;
 
 	//// 46 permute
 	//vector<int> a = {1,2,3,4};
