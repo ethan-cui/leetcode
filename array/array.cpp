@@ -1,4 +1,5 @@
 #include <vector>
+#include <unordered_map>
 #include <iterator>
 #include <string>
 #include <algorithm>
@@ -311,38 +312,34 @@ public:
 		}
 	}
 
+	// 47 Permutation II
 	vector<vector<int>> permuteUnique(vector<int>& nums){
 		vector<vector<int>> res;
 		if (nums.size() == 0) return res;
-
 		vector<int> valueList;
+		vector<int> visited(nums.size(), 0);
 		sort(nums.begin(), nums.end());
-		permuteUniqueHelper(nums, 0, &res, valueList);
+
+		permuteUniqueHelper(nums, visited, &res, valueList);
 
 		return res;
 
 
 	}
 
-	void permuteUniqueHelper(vector<int>& nums,unsigned pos, vector<vector<int>> *res, vector<int> valueList){
-		if (pos == nums.size()){
+	void permuteUniqueHelper(vector<int>& nums, vector<int>& visited, vector<vector<int>> *res, vector<int> valueList){
+		if (valueList.size() == nums.size()){
 			res->push_back(valueList);
 			return;
 		}
 
-		for (unsigned i=pos; i<nums.size(); i++){
-			if (i>pos && nums[pos] == nums[i]) continue;
-			if (i>pos && nums[i-1] == nums[i]) continue;
-		
-
-			int temp = nums[pos] ^ nums[i];
-			nums[pos] ^= temp;
-			nums[i] ^= temp;
-			valueList.push_back(nums[pos]);
-			permuteUniqueHelper(nums, pos+1, res, valueList);
+		for (unsigned i=0; i<nums.size(); i++){
+			if (visited[i] == 1 || (i>0 && nums[i-1] == nums[i] && visited[i-1] == 0)) continue;
+			valueList.push_back(nums[i]);
+			visited[i] = 1;
+			permuteUniqueHelper(nums, visited, res, valueList);
 			valueList.pop_back();
-			nums[pos] ^= temp;
-			nums[i] ^= temp;
+			visited[i] = 0;
 		}
 	}
 
@@ -428,6 +425,161 @@ public:
 		cout << "after " << nums << endl;
 	}
 
+	// 60 permutation sequence getPermutation
+	string getPermutation_1(int n, int k){
+		// this one does not pass because time limit exceeded
+		string res;
+		if (n < 1 || n > 9 || k<1) return res;
+		vector<int> x;
+		for (int i=1; i<=n; i++)
+			x.push_back(i);
+
+		for (int i=1; i<k; i++)
+			nextPermutation(x);
+		
+		for (auto i:x)
+			res += to_string(i);
+		return res;
+	}
+
+	string getPermutation(int n, int k){
+		string res;
+		if (n < 1 || n > 9 || k<1) return res;
+
+		vector<int> a = {0, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880};
+
+		if (k>a[n]) return res;
+		vector<int> x;
+		for (int i=1; i<=n; i++) x.push_back(i);
+
+		while(k != 0){
+			for (int i=1; i<=n; i++){
+				if (k == a[i]){
+					vector<int>::iterator it = x.begin();
+					std::advance(it, n-i);
+					reverse(it, x.end()); // in this case, it is a reverse
+					k -= a[i];
+					break;
+				}
+				if (i<n && k > a[i] && k < a[i+1]){
+					vector<int>::iterator it = x.begin();
+					std::advance(it, n-i);
+					std::reverse(it, x.end());
+					k -= a[i];
+					nextPermutation(x);
+				}
+			}
+		}
+		for (auto i:x)
+			res += to_string(i);
+		return res;
+	}
+
+	// 131 Palindrome partition
+	bool checkPalindrome(string s){
+		return s == string(s.rbegin(), s.rend());
+	}
+
+	vector<vector<string>> partition(string s){
+		vector<vector<string>> res;
+		if (s.length() == 0) return res;
+		vector<string> valueList;
+		partitionHelper(s, 0, &res, valueList);
+		return res;
+	}
+
+	void partitionHelper(string s, unsigned pos, vector<vector<string>> *res, vector<string> &valueList){
+		if (pos == s.length()){
+			res->push_back(valueList);
+			return;
+		}
+
+		for (unsigned i=pos; i<s.length(); i++){
+			string temp = s.substr(pos, i-pos+1);
+			if (!checkPalindrome(temp)) continue;
+			valueList.push_back(temp);
+			partitionHelper(s, i+1, res, valueList);
+			valueList.pop_back();
+		}
+	}
+
+	// 17 letterCombinations
+	vector<string> letterCombinations(string digits){
+		unordered_map<char, string> d = {
+			{'2', string("abc")},
+			{'3', string("def")},
+			{'4', string("ghi")},
+			{'5', string("jkl")},
+			{'6', string("mno")},
+			{'7', string("pqrs")},
+			{'8', string("tuv")},
+			{'9', string("wxyz")}
+		};
+
+		vector<string> res;
+		if (digits.length() == 0) return res;
+
+		vector<string> a;
+		for (unsigned i=0; i<digits.length(); i++)
+			a.push_back(d[digits[i]]);
+		string str("");
+		res.push_back(str);
+		vector<string> temp;
+		for (unsigned k=0; k<a.size(); k++){
+			temp = res;
+			res.clear();
+			for (unsigned i=0; i<a[k].length(); i++){
+				for (unsigned j=0; j<temp.size();j++){
+					res.push_back(temp[j] + a[k].substr(i, 1));
+				}
+			}
+		}
+		return res;
+
+	}
+
+	// 132 minCut
+	bool checkPalindromeOpt(string s){
+		if (s.length() == 0) return false;
+		int lo = 0, hi = s.length()-1;
+		while (lo < hi){
+			if (s[lo] != s[hi]) return false;
+			lo++;
+			hi--;
+		}
+		return true;
+	}
+
+	//int minCut(string s){
+		//if (s.length() == 0) return;
+		//if (s.length() == 1) return 0;
+
+	vector<int> twoSum(vector<int>& nums, int target){
+		vector<int> res;
+		if (nums.size() == 0) return res;
+		vector<int> temp = nums;
+
+		unsigned i=0, j=nums.size()-1;
+		sort(nums.begin(), nums.end());
+		while (i<=j){
+			if (nums[i] + nums[j] > target)
+				j--;
+			else if (nums[i] + nums[j] < target)
+				i++;
+			else {
+				for (unsigned k=0; k<temp.size(); k++){
+					if (temp[k] == nums[i])
+						res.push_back(k);
+					else if (temp[k] == nums[j])
+						res.push_back(k);
+					if (res.size() == 2)
+						return res;
+				}
+			}
+		}
+		return res;
+	}
+
 
 
 };
@@ -435,11 +587,27 @@ public:
 int main(){
 
 	Solution s;
-	// 31. nextPermutation
-	vector<int> a = {3,2,1};
-	s.nextPermutation(a);
-	
+	// 1 twoSum
+	//vector<int> temp = {2, 7, 11, 15};
+	vector<int> temp = {3,2, 4};
+	cout << s.twoSum(temp, 6) << endl;
 
+	//// 17 letterCombination
+	//vector<string> temp = s.letterCombinations(string("23"));
+
+	
+	//// 131 patition	
+	//vector<vector<string> > temp = s.partition("aba");
+	//cout << s.partition("aab") << endl;
+	//cout << s.partition("aba") << endl;
+
+	////60. getPermutation
+	//string res = s.getPermutation(5,120);
+	//cout << res << endl;
+	
+	//// 31. nextPermutation
+	//vector<int> a = {3,2,1};
+	//s.nextPermutation(a);
 
 	////93 restoreIpAddresses
 	//cout << s.restoreIpAddresses(string("25525511135")) << endl;
@@ -452,7 +620,7 @@ int main(){
 	//cout << s.grayCode(2) << endl;
 	
 	//// 47 permuteUnique
-	//vector<int> a = {1,2,2,1,3,3};
+	//vector<int> a = {1,1,2,2,3,3,4};
 	//vector<vector<int>> temp = s.permuteUnique(a);
 	//cout << temp.size() << endl;
 
@@ -486,8 +654,8 @@ int main(){
 	//cout << temp.size() << endl;
 	
 
-	//for(auto& x:temp)
-		//cout << x << endl;
+	for(auto& x:temp)
+		cout << x << endl;
 
 
 	return 0;
