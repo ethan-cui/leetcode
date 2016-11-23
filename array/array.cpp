@@ -1,8 +1,10 @@
 #include <vector>
+#include <array>
 #include <unordered_map>
 #include <iterator>
 #include <string>
 #include <algorithm>
+#include <sstream>
 #include "../utils.hpp"
 
 using namespace std;
@@ -566,6 +568,9 @@ public:
 				j--;
 			else if (nums[i] + nums[j] < target)
 				i++;
+
+
+
 			else {
 				for (unsigned k=0; k<temp.size(); k++){
 					if (temp[k] == nums[i])
@@ -580,6 +585,285 @@ public:
 		return res;
 	}
 
+	vector<string> generateParenthesis(int n){
+		vector<string> res;
+		if (n == 0)
+			return res;
+		string valueList;
+
+		generateParenthesisHelper(0, 0, &res, valueList, n);
+		return res;
+	}
+
+	void generateParenthesisHelper(int nl, int nr, vector<string>* res, string valueList, int n){
+		if (nl == nr && nl == n){
+			res->push_back(valueList);
+			return;
+		}
+
+		if (nl > n || nr > nl)
+			return;
+
+		if (nl == nr){
+			string temp = string("(");
+			generateParenthesisHelper(nl+1, nr, res, valueList+temp, n);
+		} else {
+			string temp = string("(");
+			generateParenthesisHelper(nl+1, nr, res, valueList+temp, n);
+			temp = string(")");
+			generateParenthesisHelper(nl, nr+1, res, valueList+temp, n);
+		}
+	}
+
+	vector<string> readBinaryWatch(int num){
+
+		vector<string> res;
+
+		if (num == 0){
+			res.push_back(string("0:00"));
+			return res;
+		}
+		if (num > 9)
+			return res;
+
+		vector<int> valueList;
+		readBinaryWatchHelper(num, 0, 0, &res, valueList);
+		return res;
+
+	}
+
+	void readBinaryWatchHelper1(int n, int pos, int cnt, vector<string> *res, vector<int> valueList){
+		if (pos > 10)
+			return;
+		if (cnt == n){
+			// get all those numbers
+			// }
+			int upper = (1<<10) - (1<<6);
+			int lower = (1<<6) - 1;
+			int number = 0;
+			for (int j=0; j<n; ++j)
+				number |= (1<< valueList[j]);
+			int h = (number & upper)>>6;
+			int m = number & lower;
+			if (h>11 || m>59)
+				return;
+			string hh = to_string(h);
+			string mm;
+			if (m<10)
+				mm = string("0") + to_string(m);
+			else
+				mm = to_string(m);
+			res->push_back(hh + string(":") + mm);
+			return;
+		}
+		
+		for (int i=pos; i<10; ++i){
+			valueList.push_back(i);
+			readBinaryWatchHelper(n, i+1, cnt+1, res, valueList);
+			valueList.pop_back();
+		}
+
+	}
+	void readBinaryWatchHelper(int n, int pos, int cnt, vector<string> *res, vector<int> valueList){
+		if (pos > 10)
+			return;
+		if (cnt == n){
+			// get all those numbers
+			// }
+			int upper = (1<<10) - (1<<6);
+			int lower = (1<<6) - 1;
+			int number = 0;
+			for (int j=0; j<n; ++j)
+				number |= (1<< valueList[j]);
+			int h = (number & upper)>>6;
+			int m = number & lower;
+			if (h>11 || m>59)
+				return;
+			stringstream ss;
+			ss << h;
+			ss << ":";
+			if (m<10)
+				ss << "0";
+			ss << m;
+			string t = ss.str();
+			res->push_back(t);
+			return;
+		}
+		
+		for (int i=pos; i<10; ++i){
+			valueList.push_back(i);
+			readBinaryWatchHelper(n, i+1, cnt+1, res, valueList);
+			valueList.pop_back();
+		}
+
+	}
+
+	int removeDuplicates(vector<int> & nums){
+		int n = nums.size();
+		if (n < 2) return n;
+
+		int i=1, j=1;
+		while (j<n){
+			if (nums[j-1] == nums[j]) {
+				++j;
+				continue;
+			} else if (i == j) {
+				++j; 
+				++i;
+			} else {
+				nums[i] = nums[j];
+				++j;
+				++i;
+			}
+		}
+		return i;
+	}
+
+	int removeElement1(vector<int> & nums, int val){
+		if (nums.size() == 0) return 0;
+	       	int n = nums.size();
+		int i = 0, j = n-1;
+		// move i to the first num = val, move j to first num != val, from rear
+		while (i<n && nums[i] != val) ++i;
+		if (i == n) return n;
+		while (j>-1 && nums[j] == val) --j;
+		if (j == -1) return 0;
+
+		if (j<i) return j+1; // [4, 3] 3
+
+		nums[i] = nums[j];
+		--j;
+		while (i<j){
+			while (nums[j] == val) --j;
+			while (nums[i] != val && i<j) ++i;
+			if (i == j) return j+1;
+			else {
+				nums[i] = nums[j];
+				--j;
+			}
+		}
+		return j+1;
+	}
+
+	int removeElement(vector<int> & nums, int val){
+		unsigned i=0;
+		for (unsigned j=0; j<nums.size(); j++){
+			if (nums[j] != val){
+				nums[i++] = nums[j];
+			}
+		}
+		return i;
+	}
+
+	vector<int> plusOne(vector<int>& digits){
+		vector<int> res;
+		if (digits.size() == 0) return res;
+		int i = digits.size() - 1;
+
+		for (;i>=0;i--){
+			if (digits[i] + 1 == 10)
+				digits[i] = 0;
+			else {
+				digits[i] += 1;
+				break;
+			}
+		}
+
+		if (i == -1 && digits[0] == 0){
+			vector<int>::iterator it = digits.begin();
+			digits.insert(it,1);
+		}
+		return digits;
+	}
+
+	// 118 Pascal's Triangle
+	vector<vector<int>> generate(int numRows){
+		vector<vector<int>> res;
+		if (numRows == 0) return res;
+		res.push_back(vector<int>{1});
+		if (numRows == 1) return res;
+		res.push_back(vector<int>{1,1});
+		if (numRows == 2) return res;
+
+		for (int i=2; i<numRows; i++){
+			vector<int> temp = {1};
+			for (int j=0; j<i-1; j++)
+				temp.push_back(res[i-1][j] + res[i-1][j+1]);
+			temp.push_back(1);
+			res.push_back(temp);
+		}
+		return res;
+	}
+
+	vector<int> getRow(int rowIndex){
+		vector<int> nil;
+		if (rowIndex < 0) return nil;
+		vector<int> res(rowIndex+1);
+		res[0] = 1;
+		for (int i=1; i<=rowIndex; i++){
+			if (i <= rowIndex/2)
+				res[i] = (long)res[i-1] * (rowIndex-i+1) / i;
+			else
+				res[i] = res[rowIndex-i];
+		}
+		return res;
+	}
+
+	int minimumTotal(vector<vector<int>>& triangle){
+		int n = triangle.size();
+		if (n == 0) return 0;
+		int value = triangle[0][0];
+		if (n == 1) return value;
+
+		vector<vector<int>> pos(n);
+		vector<vector<int>> values(n);
+		for(int i=0; i<n; i++){
+			vector<int> temp(n, 0);
+		       	pos[i]=temp; 	
+			values[i]=temp;
+		}
+
+		// fill the first column and diagnal
+		values[0][0] = triangle[0][0];
+		pos[0][0] = 0;
+
+		for (int i=1; i<n; i++){// start from the second row
+			pos[i][0] = 0; // 0 represent right on top
+			values[i][0] = values[i-1][0] + triangle[i][0];
+			pos[i][i] = -1;
+			values[i][i] = values[i-1][i-1] + triangle[i][i];
+		}
+
+		for (int i=2; i<n; i++){
+			for (int j=1; j<i; j++){
+				int sumtemp_1 = values[i-1][j-1] + triangle[i][j];
+				int sumtemp_2 = values[i-1][j] + triangle[i][j];
+				if (sumtemp_1 < sumtemp_2){
+					values[i][j] = sumtemp_1;
+					pos[i][j] = -1;
+				} else {
+					values[i][j] = sumtemp_2;
+					pos[i][j] = 0;
+				}
+			}
+		}
+
+		int min = 0x7fffffff;
+		for (int i=0; i<n; i++){
+			if (values[n-1][i] < min)
+				min = values[n-1][i];
+		}
+		cout << pos << endl;
+		cout << values << endl;
+		return min;
+
+
+
+	}
+
+
+	
+
 
 
 };
@@ -587,10 +871,45 @@ public:
 int main(){
 
 	Solution s;
-	// 1 twoSum
-	//vector<int> temp = {2, 7, 11, 15};
-	vector<int> temp = {3,2, 4};
-	cout << s.twoSum(temp, 6) << endl;
+	// 120 Triangle
+	//vector<vector<int>> temp = { {2},{3,4},{6,5,7},{4,1,8,3} };
+	vector<vector<int>> temp = { {-1}, {2,3}};
+	cout << s.minimumTotal(temp) << endl;
+
+
+	//// 119 Pascal's Triangle II
+	//vector<int> temp = s.getRow(11);
+
+	//// 118 Pascal's Triangle
+	//vector<vector<int>> temp =s.generate(10);
+
+	//// 66 plusOne
+	//vector<int> nums = {9,9,9};
+	//vector<int> temp = s.plusOne(nums);
+
+
+	//// 27 removeElement
+	//vector<int> temp = {4,4};
+	//int n = s.removeElement(temp, 4);
+	//cout << n << endl;
+
+	//// 26 removeDuplicates
+	//vector<int> temp = {1,1,2};
+	//int n = s.removeDuplicates(temp);
+
+	
+
+	//// 401 readBinaryWatch
+	//vector<string> temp = s.readBinaryWatch(3);
+
+
+	//// 22 generateParenthesis
+	//vector<string> temp = s.generateParenthesis(3);
+	
+	//// 1 twoSum
+	////vector<int> temp = {2, 7, 11, 15};
+	//vector<int> temp = {3,2, 4};
+	//cout << s.twoSum(temp, 6) << endl;
 
 	//// 17 letterCombination
 	//vector<string> temp = s.letterCombinations(string("23"));

@@ -526,12 +526,24 @@ public:
 		return res;
 	}
 
+	// 389 find the difference
+	char findTheDifference(string s, string t){
+		int res = 0;
+		for (unsigned i=0; i<s.length(); i++) res ^= s[i];
+		for (unsigned i=0; i<t.length(); i++) res ^= t[i];
+		return (char) res;
+
+	}
+
 
 };
 
 int main(){
 
 	Solution s;
+	// 389 find the difference
+	cout << s.findTheDifference(string("abcd"), string("abcde")) << endl;
+	
 
 	//// for toHex
 	//cout << s.toHex(10) << endl;
@@ -577,11 +589,11 @@ int main(){
 
 
 
-	// for subsets
-	vector<int> nums=range(2);
-	s.subsets(nums);
-	s.subsets1(nums);
-	s.subsets2(nums);
+	//// for subsets
+	//vector<int> nums=range(2);
+	//s.subsets(nums);
+	//s.subsets1(nums);
+	//s.subsets2(nums);
 	
 	
 	//// for singleNumberII
