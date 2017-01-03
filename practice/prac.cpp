@@ -1,4 +1,5 @@
 #include <vector>
+#include <string>
 #include "../utils.hpp"
 
 
@@ -42,9 +43,16 @@ int main(){
 	cout << "hello world" << endl;
 	Solution s;
 
-	//// for subsets
-	vector<int> nums=range(10);
-	s.subsets(nums);
+	auto tree = constructBinaryTree("[5,4,7,3,null,2,null,-1,null,9]");
+	cout << tree << endl;
+	
+	
+
+	
+
+	////// for subsets
+	//vector<int> nums=range(10);
+	//s.subsets(nums);
 
 
 	
