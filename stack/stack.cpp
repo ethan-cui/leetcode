@@ -214,7 +214,96 @@ public:
 			}
 				
 		}
+		return res;
+	}
 
+
+	// 103. Binary Tree Zigzag Level Order Traversal
+	vector<vector<int> > zigzagLevelOrder(shared_ptr<TreeNode> root){
+		vector<vector<int> > res;
+		if (!root) return res;
+		stack<shared_ptr<TreeNode>> sk1, sk2; // sk1 to start
+
+		sk1.push(root);
+		bool sk1_tag=true;
+		shared_ptr<TreeNode> temp;
+
+		while(!sk1.empty() || !sk2.empty()){
+			vector<int> temp_res;
+			if (sk1_tag) {
+				while(!sk1.empty()){
+					temp = sk1.top();
+					if (temp) {
+						temp_res.push_back(temp->val);
+						sk2.push(temp->left);
+						sk2.push(temp->right);
+					}
+					sk1.pop();
+				}
+				if (temp_res.size()) res.push_back(temp_res);
+				sk1_tag = false;
+			} else {
+				while(!sk2.empty()){
+					temp = sk2.top();
+					if (temp){
+						temp_res.push_back(temp->val);
+						sk1.push(temp->right);
+						sk1.push(temp->left);
+					}
+					sk2.pop();
+				}
+				if (temp_res.size()) res.push_back(temp_res);
+				sk1_tag = true;
+			}
+		}
+		return res;
+	}
+
+	vector<int> preorderTraversal1(shared_ptr<TreeNode> root){
+		vector<int> res;
+		if (!root) return res;
+		stack<shared_ptr<TreeNode>> sk;
+		sk.push(root);
+
+		shared_ptr<TreeNode> temp;
+		bool processed = false;
+		res.push_back(root->val);
+		while(!sk.empty()){
+			temp = sk.top();
+			while (temp->left && !processed){
+				res.push_back(temp->left->val);
+				sk.push(temp->left);
+				temp = temp->left;
+			}
+			processed = true;
+			temp = sk.top();
+			sk.pop(); // pop out the nullptr
+			if (temp->right){
+				sk.push(temp->right);
+				res.push_back(temp->right->val);// need to push in right now, next time when it popped out, will process its left
+				processed = false;
+			}
+		}
+
+		return res;
+	}
+
+	vector<int> preorderTraversal(shared_ptr<TreeNode> root){
+		vector<int> res;
+		if (!root) return res;
+		stack<shared_ptr<TreeNode>> sk;
+		sk.push(root);
+
+		shared_ptr<TreeNode> temp;
+		while(!sk.empty()){
+			temp = sk.top();
+			sk.pop();
+			if (temp){
+				res.push_back(temp->val);
+				sk.push(temp->right);
+				sk.push(temp->left);
+			}
+		}
 		return res;
 	}
 
@@ -224,9 +313,20 @@ public:
 int main(){
 
 	Solution s;
-	// 94. Binary Tree Inorder Traversal
-	auto treeRoot = constructBinaryTree("[1,null,2,3]");
-	cout << s.inorderTraversal(treeRoot) << endl;
+	// 144. Binary Tree Preorder Traversal
+	auto treeRoot = constructBinaryTree("[3,9,20,null,null,15,7]");
+	cout << s.preorderTraversal(treeRoot) << endl;
+	
+
+
+	//// 103. Binary Tree Zigzag Level Order Traversal
+	//auto treeRoot = constructBinaryTree("[3,9,20,null,null,15,7]");
+	//cout << s.zigzagLevelOrder(treeRoot) << endl;
+
+
+	//// 94. Binary Tree Inorder Traversal
+	//auto treeRoot = constructBinaryTree("[1,null,2,3]");
+	//cout << s.inorderTraversal(treeRoot) << endl;
 
 
 	//// 85 Maximal Rectangle
