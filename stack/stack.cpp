@@ -1,4 +1,6 @@
 #include <vector>
+#include <sstream>
+#include <array>
 #include <queue>
 #include <algorithm>
 #include <stack>
@@ -15,6 +17,182 @@
 
 
 using namespace std;
+
+// 155. Min Stack
+class MinStack {
+public:
+/** initialize your data structure here. */
+	MinStack() {}
+
+	void push(int x) {
+		if (sk.empty()) {
+			sk.push(x);
+			sk_min.push(x);
+		} else {
+			int cur_min = sk_min.top();
+			sk.push(x);
+			if (cur_min > x) sk_min.push(x);
+			else sk_min.push(cur_min);
+		}
+	}
+
+	void pop() {
+		sk.pop();
+		sk_min.pop();
+	}
+
+	int top() {
+		return sk.top();
+	}
+
+	int getMin() {
+		return sk_min.top();
+	}
+
+	stack<int> sk;
+	stack<int> sk_min;
+
+};
+
+// 225. Implement Stack using Queues
+class Stack{
+public:
+	queue<int> q1, q2;
+
+	void push(int x){
+		if (q1.empty() && q2.empty())
+			q1.push(x);
+		else if (q1.empty())
+			q2.push(x);
+		else q1.push(x);
+	}
+
+	void pop(){
+		if (q1.empty()){
+			int sz = q2.size();
+			for (int i=0; i<sz-1;i++){
+				q1.push(q2.front());
+				q2.pop();
+			}
+			q2.pop();
+		} else {
+			int sz = q1.size();
+			for (int i=0; i<sz-1; i++){
+				q2.push(q1.front());
+				q1.pop();
+			}
+			q1.pop();
+		}
+	}
+
+	int top(){
+		int res=0;
+		if (q1.empty()){
+			int sz = q2.size();
+			for (int i=0; i<sz-1;i++){
+				q1.push(q2.front());
+				q2.pop();
+			}
+			res = q2.front();
+			q1.push(q2.front());
+			q2.pop();
+		} else {
+			int sz = q1.size();
+			for (int i=0; i<sz-1; i++){
+				q2.push(q1.front());
+				q1.pop();
+			}
+			res = q1.front();
+			q2.push(q1.front());
+			q1.pop();
+		}
+		return res;
+	}
+
+	bool empty(){
+		return q1.empty() && q2.empty();
+	}
+
+};
+
+// 232. Implement Queue using Stacks
+class Queue{
+public:
+	stack<int> sk1, sk2;
+	void push(int x){
+		if (sk2.empty()) {
+			sk2.push(x);
+		} else {
+			while(!sk2.empty()){
+				sk1.push(sk2.top());
+				sk2.pop();
+			}
+			sk2.push(x);
+			while(!sk1.empty()){
+				sk2.push(sk1.top());
+				sk1.pop();
+			}
+		}
+	}
+
+	void pop(){
+		if (!sk2.empty()) sk2.pop();
+	}
+
+	int peek(){
+		return sk2.top();
+	}
+
+	bool empty(){
+		return sk2.empty();
+	}
+
+
+};
+
+// 173. Binary Search Tree Iterator
+class BSTIterator{
+public:
+	stack<shared_ptr<TreeNode>> sk;
+	bool processed;
+
+	BSTIterator(){}
+
+	BSTIterator(shared_ptr<TreeNode> root){
+		processed = false;
+		if (root){
+			sk.push(root);
+			shared_ptr<TreeNode> temp = sk.top();
+			while (temp->left) {
+				sk.push(temp->left);
+				temp = temp->left;
+			}
+			processed = true;
+		}
+	}
+
+	bool hasNext(){
+		return !sk.empty();
+	}
+
+	int next(){
+		if (!hasNext()) return 0;
+		shared_ptr<TreeNode> temp = sk.top();
+		while (temp->left && !processed) {
+			sk.push(temp->left);
+			temp = temp->left;
+		}
+		processed = true;
+		int res = temp->val;
+		sk.pop();
+		if (temp->right){
+			sk.push(temp->right);
+			processed = false;
+		}
+		return res;
+	}
+};
+
 
 
 class Solution{
@@ -307,15 +485,340 @@ public:
 		return res;
 	}
 
+	// 145. Binary Tree Postorder Traversal
+	vector<int> postorderTraversal(shared_ptr<TreeNode> root){
+		vector<int> res;
+		if (!root) return res;
+		stack<shared_ptr<TreeNode>> sk;
+		sk.push(root);
+		shared_ptr<TreeNode> temp;
+
+
+		while(!sk.empty()){
+			temp = sk.top();
+			sk.pop();
+			
+			if (temp){
+			sk.push(temp->left);
+			sk.push(temp->right);
+			res.push_back(temp->val);
+			}
+		}
+		return vector<int>(res.rbegin(), res.rend());
+	}
+
+	// 150. Evaluate Reverse Polish Notation
+	int evalRPN(vector<string>& tokens){
+		if (tokens.size() == 0) return 0;
+
+		stack<int> sk;
+		string a = string("+");
+		string b = string("-");
+		string c = string("*");
+		string d = string("/");
+
+		for (unsigned i=0; i<tokens.size(); i++){
+			string token = tokens[i];
+			if (token!=a && token!=b && token!=c && token!=d){
+				sk.push(stoi(token));
+			} else {
+				int second = sk.top();
+				sk.pop();
+				int first = sk.top();
+				sk.pop();
+				if (token == a) sk.push(first + second);
+				else if (token == b) sk.push(first - second);
+				else if (token == c) sk.push(first * second);
+				else  sk.push(first / second);
+			}
+		}
+
+		return sk.top();
+	}
+
+	// 224. Basic Calculator
+	int calculate_old(string s){
+		if (s.length() == 0) return 0;
+
+		stack<int> sk;
+		int tempsum=0;
+		int sign = 1;
+		for (unsigned i=0; i<s.length(); i++){
+			
+			if(s[i] == ' ') continue;
+			if (s[i] == '(' ) {
+				if (i>0) sign = s[i-1] == '+' ? 1 : -1;
+				sk.push(tempsum);
+				sk.push(sign);
+				tempsum = 0;
+			} else if (s[i] >= '0' && s[i] <= '9') {
+			       tempsum += (static_cast<int> (s[i]) - 48) * sign;
+			} else if (s[i] == '-') {
+				sign = -1;
+			} else if (s[i] == '+') {
+				sign = 1;
+			} else {
+				sign = sk.top();
+				sk.pop();
+				tempsum = sign * tempsum + sk.top();
+				sk.pop();
+			}
+			cout << tempsum << endl;
+		}
+		return tempsum;
+	}
+
+	int calculate(string s){
+		if (s.length() == 0) return 0;
+
+		stack<int> sk;
+		int tempsum=0, num = 0;
+		int sign = 1;
+		for (unsigned i=0; i<s.length(); i++){
+			if (s[i] == ' ') continue;
+			if (s[i] == '(') {
+				sk.push(tempsum);
+				sk.push(sign);
+				sign = 1;
+				tempsum = 0;
+				
+			} else if (s[i] == ')') {
+				tempsum += num * sign;
+				num = 0;
+				sign = sk.top();
+				sk.pop();
+				tempsum = sk.top() + tempsum * sign;
+				sk.pop();
+
+			} else if (s[i] == '+' || s[i] == '-'){
+				tempsum += num * sign;
+				num = 0;
+				sign = s[i] == '+' ? 1 : -1;
+			} else {
+				num = num * 10 + static_cast<int> (s[i]) - 48;
+			}
+		}
+		tempsum += num * sign;
+		return tempsum;
+	}
+
+	// 316. Remove Duplicate Letters
+	string removeDuplicateLetters_old(string s){
+		// sturcture of solution
+		// 1. for element that cnt > 1(means they still have something later, they must in increasing order.
+		// 2. for 
+
+		string res;
+		if (s.length() == 0) return res;
+
+		vector<char> v;
+		unordered_map<char, int> mp;
+
+		for (unsigned i=0; i<s.length(); i++){
+			if (mp.find(s[i]) == mp.end()) {
+				mp[s[i]] = 1;
+			} else {
+				mp[s[i]] += 1;
+			}
+		}
+
+		for (unsigned i=0; i<s.length(); i++){
+			mp[s[i]] -=1;
+			if (find(v.begin(), v.end(), s[i]) != v.end()) {
+				continue;
+			}
+			if (v.size() == 0 ) {
+				v.push_back(s[i]);
+				continue;
+			}
+			if (v.back() < s[i]){
+				v.push_back(s[i]);
+				continue;
+			}
+			while (v.back() > s[i] && mp[v.back()] >0){
+				v.pop_back();
+			}
+			v.push_back(s[i]);
+		}
+
+		// need to document
+		return string(v.begin(), v.end());
+
+	}
+
+	string removeDuplicateLetters(string s){
+		string res;
+		if (s.length() == 0) return res;
+		vector<int> cnt(26, 0), exist(26, 0);
+
+		for (char x:s) cnt[x-'a']++;
+
+		for (char x:s){
+			cnt[x-'a']--;
+			if (res.length() == 0){
+				res.push_back(x);
+				exist[x-'a'] = 1;
+				continue;
+			} else if (exist[x-'a']) continue;
+			if (res.back() < x){
+				res.push_back(x);
+				exist[x-'a'] = 1;
+				continue;
+			}
+			while(res.back() > x && cnt[res.back()-'a'] > 0) {
+				exist[res.back()-'a'] = 0;
+				res.pop_back();
+			}
+			res.push_back(x);
+			exist[x-'a'] = 1;
+		}
+		return res;
+	}
+
+	// 331. Verify Preorder Serialization of a Binary Tree
+	bool isValidSerialization(string preorder){
+		if (preorder.length() == 0) return true;
+		stringstream ss(preorder);
+		string item;
+		stack<string> sk;
+		string first, second, third;
+		string h("#");
+
+		while (getline(ss, item, ',')){
+			cout << item << " ";
+			if (sk.size() < 3){
+				sk.push(item);
+				continue;
+			}
+
+			third = sk.top();
+			sk.pop();
+			second = sk.top();
+			sk.pop();
+			first = sk.top();
+			sk.push(second);
+			sk.push(third);
+
+			while (sk.size() > 2 && first != h && second == h && third == h) {
+				sk.pop();
+				sk.pop();
+				sk.pop();
+				sk.push(h);
+
+				if (sk.size() > 2){
+					third = sk.top();
+					sk.pop();
+					second = sk.top();
+					sk.pop();
+					first = sk.top();
+					sk.push(second);
+					sk.push(third);
+				}
+			}
+			sk.push(item);
+		}
+		if (sk.size() > 2){
+
+			third = sk.top();
+			sk.pop();
+			second = sk.top();
+			sk.pop();
+			first = sk.top();
+			sk.push(second);
+			sk.push(third);
+
+			while (sk.size() > 2 && first != h && second == h && third == h) {
+				sk.pop();
+				sk.pop();
+				sk.pop();
+				sk.push(h);
+
+				if (sk.size() > 2){
+					third = sk.top();
+					sk.pop();
+					second = sk.top();
+					sk.pop();
+					first = sk.top();
+					sk.push(second);
+					sk.push(third);
+				}
+			}
+		}
+		
+		 cout << endl;
+		 cout << sk << endl; 
+		return sk.size() ==1 && sk.top() == h;
+
+	}
+	bool test(string preorder){
+
+	    if (preorder.empty()) return false;
+	        preorder+=',';
+		    int sz=preorder.size(),idx=0;
+		        int capacity=1;
+			    for (idx=0;idx<sz;idx++){
+				            if (preorder[idx]!=',') continue;
+					            capacity--;
+						            if (capacity<0) return false;
+							            if (preorder[idx-1]!='#') capacity+=2;
+								        }
+			        return capacity==0;
+	}
+
+
+		
 
 };
 
 int main(){
 
 	Solution s;
-	// 144. Binary Tree Preorder Traversal
-	auto treeRoot = constructBinaryTree("[3,9,20,null,null,15,7]");
-	cout << s.preorderTraversal(treeRoot) << endl;
+	// 331. Verify Preorder Serialization of a Binary Tree
+	string str("9,#,#,#,#,#,#,#,3,4,1,2,6");
+	//string str("9,3,4,#,#,1,#,#,2,#,6,#,#");
+	cout << s.isValidSerialization(str) << endl;
+	cout << s.test(str) << endl;
+
+	//// 173. Binary Search Tree Iterator
+	//auto treeRoot = constructBinaryTree("[3,9,20,null,null,15,7]");
+	//BSTIterator bsti (treeRoot);
+	//while (bsti.hasNext()) cout << bsti.next()<< endl;
+
+
+	//// 155. Min Stack
+	//MinStack ms = MinStack();
+	//ms.push(-2);
+	//ms.push(0);
+	//ms.push(-1);
+	//cout << ms.getMin() << endl;
+
+	//// 316. Remove Duplicate Letters
+	//string str("cbacfdcbeaf");
+	//cout << s.removeDuplicateLetters(str) << endl;
+
+
+	//// 224. Basic Calculator
+	////string str("1+((4+5+2)-3)+(16+8)");
+	////string str("2147483647");
+	//string str("1-(5)");
+	//cout << s.calculate(str) << endl;
+
+
+	//// 150. Evaluate Reverse Polish Notation
+	
+	////vector<string> v{"2", "1", "+", "3", "*"};
+	//vector<string> v{"4", "13", "5", "/", "+"};
+	//cout << s.evalRPN(v) << endl;
+
+
+	//// 145. Binary Tree Postorder Traversal
+	//auto treeRoot = constructBinaryTree("[3,9,20,null,null,15,7]");
+	//cout << s.postorderTraversal(treeRoot) << endl;
+	
+
+	//// 144. Binary Tree Preorder Traversal
+	//auto treeRoot = constructBinaryTree("[3,9,20,null,null,15,7]");
+	//cout << s.preorderTraversal(treeRoot) << endl;
 	
 
 

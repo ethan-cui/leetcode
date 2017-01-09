@@ -3,6 +3,7 @@
 
 
 #include <iostream>
+#include <stack>
 #include <sstream>
 #include <memory>
 #include <vector>
@@ -26,7 +27,17 @@ std::ostream& operator << (std::ostream& os, const std::vector<T>& vec){
 	return os;
 }
 
+template <typename T>
+std::ostream& operator << (std::ostream& os, std::stack<T> sk){
+	while (!sk.empty()){
+		os << sk.top() << " ";
+		sk.pop();
+	}
+	return os;
+}
+
 std::ostream& operator << (std::ostream& os, const std::shared_ptr<TreeNode>& sp){
+	// level order print queue
 	std::queue<std::shared_ptr<TreeNode>> q;
 	q.push(sp);
 	while (!q.empty()){
